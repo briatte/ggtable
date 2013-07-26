@@ -2,7 +2,7 @@
 
 __ggtable__ is a wrapper for a family of bar plots that are commonly used with low-dimensional variables from [questionnaire][4dpc] or survey data. Such variables will use a low number of response items, generally as nominal categories or ordered scales. The bar plots for their fequencies will consist of horizontal bars or stacked bars, using raw counts or percentages.
 
-__See also__ the `vcd` package, the [`likert`][likert] package for more advanced plots with scaled response items, or [Marrimekko plots][ds] to plot proportions in nested categorical data. These are more advanced solutions, while `ggtable` is just a convenience wrapper to quickly get bar plots out of categorical or ordinal data.
+__See also__ the `vcd` package, the [`likert`][likert] package for more advanced plots with scaled response items, or ways to produce [Marrimekko plots][ds] to plot proportions in nested categorical data. These are more advanced solutions, like the developing [productplots][hw-pplots] package; meanwhile, `ggtable` is a convenience wrapper to quickly get your bar plots done.
 
 [4dpc]: http://4dpiecharts.com/2010/09/25/visualising-questionnaires/
 [likert]: http://jason.bryer.org/likert/

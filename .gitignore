@@ -1,3 +1,8 @@
 .DS_Store
 .Rproj.*
 *.Rproj
+.Rproj.user
+.Rdata
+.Rhistory
+
+# that's it

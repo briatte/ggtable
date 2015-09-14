@@ -1,4 +1,4 @@
-# ggtable: simple frequencies and tabulations as bar plots
+# ggtable: plot tables with ggplot2
 
 __ggtable__ is a wrapper for a family of bar plots that are commonly used with low-dimensional variables from [questionnaire][4dpc] or survey data. Such variables will use a low number of response items, generally as nominal categories or ordered scales. The bar plots for their frequencies will consist of horizontal bars or stacked bars, using raw counts or percentages.
 

@@ -1,155 +1,233 @@
 #' ggtable - quick bar plots with ggplot2
 #'
-#' Function to plot fequencies and crosstabulations as horizontal bars or 
-#' stacked bars, using raw counts or percentages. 
-#' Please visit \link{http://github.com/briatte/ggtable} for the latest version
-#' of ggtable.
+#' Function to plot fequencies and crosstabulations as horizontal bars or
+#' stacked bars, using frequencies or percentages. Please visit
+#' \url{http://github.com/briatte/ggtable} for the latest version of
+#' \code{ggtable}.
 #'
 #' @export
-#' @param x, y vectors to plot. If a vector \code{y} is provided, the function returns the stacked bars corresponding to \code{table(x, y)}.
-#' @param percent whether to use percentages instead of raw counts. Defaults to \code{FALSE}.
-#' @param name when a vector \code{y} is provided, the title of its colour legend.
-#' @param order whether to sort the levels of vector \code{x} by decreasing order of frequency. Defaults to \code{TRUE}.
-#' @param order.x the order in which to plot the levels of vector \code{x}. Overrules \code{order}.
-#' @param order.y the order in which to plot the levels of vector \code{y}.
-#' @param label whether to add text labels to the bars. Defaults to \code{FALSE}.
-#' @param hjust horizontal adjustment for the bar labels. Defaults to \code{2}.
-#' @param color color for the bar labels. Defaults to \code{grey90} (quasi-white).
-#' @param append a single character string to append to the bar labels.
-#' @param verbose whether to return messages on the plot construction. Defaults to \code{FALSE}.
-#' @param palette when a vector \code{y} is provided, the name of a ColorBrewer palette to use to color the bars.
-#' @param position when a vector \code{y} is provided, the position of the bars split by \code{y}. Defaults to \code{"stack"}.
-#' @param legend.position location of the legend for bar colors and weights. Accepts all positions supported by ggplot2 themes. Defaults to \code{"right"}.
-#' @param ... other arguments supplied to \code{geom_text} for the bar labels. Arguments pertaining to the title or other items can be achieved through ggplot2 methods, at the exception of facet methods.
-#' @seealso \code{\link[likert]{plot.likert}} in the \link[likert]{likert} package
-#' @author François Briatte \email{f.briatte@@gmail.com}
+#' @param x, y the vectors to plot. If \code{y} is provided, the function
+#' returns the stacked bars corresponding to \code{table(x, y)}.
+#' @param weights a vector of probability weights that applies to \code{x} and
+#' \code{y}.
+#' Defaults to \code{NULL} (no weighting).
+#' @param percent whether to use percentages instead of frequencies.
+#' Defaults to \code{FALSE}.
+#' @param breaks the number of breaks to show on the count or percent scale.
+#' Defaults to \code{5}.
+#' @param name when \code{y} is supplied, the title of its colour legend.
+#' @param order whether to sort the levels of \code{x} by decreasing order of
+#' frequency.
+#' Defaults to \code{FALSE} (no reordering).
+#' @param label whether to add text labels to the bars.
+#' Defaults to \code{FALSE}.
+#' @param hjust horizontal adjustment for the bar labels.
+#' Defaults to \code{0.5} (centered).
+#' @param fill when \code{y} is \emph{not} supplied, the color of the bars.
+#' Defaults to \code{"grey20"} (dark grey).
+#' @param color color for the bar labels.
+#' Defaults to \code{"grey90"} (quasi-white).
+#' @param append a character string to append to the bar labels.
+#' Defaults to \code{""} (nothing).
+#' @param round the rounding to apply to the bar labels, if they are shown.
+#' Defaukts to \code{0} (integer rounding).
+#' @param palette when \code{y} is supplied, the name of a ColorBrewer palette
+#' to color the bars with.
+#' Defaults to \code{NULL} (use default colors).
+#' @param position when \code{y} is supplied, the position of the bars split by
+#' \code{y}.
+#' Defaults to \code{"stack"}.
+#' @param legend.position location of the legend for bar colors and weights.
+#' Accepts all positions supported by \code{\link[ggplot2]{themes}}.
+#' Defaults to \code{"right"}.
+#' @param ... other arguments supplied to \code{\link[gpplot2]{geom_text}} to
+#' label the bars.
+#' @note \code{ggtable} gets rid of all missing observations before plotting; to
+#' include them in the plot, recode \code{NA} values before using the function.
+#' @seealso \code{\link[likert]{plot.likert}} in the \link[likert]{likert}
+#' package
+#' @author Francois Briatte
 #' @examples
-#' ## Examples using Insee data from the questionr package
-#' if (require(questionr)) {
-#'   
-#'   data(hdv2003)
-#'   
-#'   ## One-way tables
-#'   freq(x <- recode.na(hdv2003$relig, "NSP ou NVPR|Rejet"))
-#'   
-#'   ggtable(x)
-#'   ggtable(x, order = FALSE, label = TRUE)
-#'   ggtable(x, percent = TRUE, label = TRUE, append = " %")
-#'   
-#'   ## Two-way tables
-#'   freq(y <- hdv2003$sexe)
-#'   
-#'   ggtable(x, y)
-#'   ggtable(x, y, percent = TRUE)
-#'   ggtable(y, x, order.y = c("Homme", "Femme"))
-#'   
-#'   ## Using options
-#'   ggtable(y, x, order = c("Homme", "Femme"), horizontal = FALSE, 
-#'           percent = TRUE, position = "dodge", legend.position = "bottom")
-#'   
-#'   ## Cleaner theme
-#'   ggtable(hdv2003$nivetud, x, percent = TRUE, palette = "RdGy") + 
+#' if (require(GGally)) {
+#'   data(happy, package = "GGally")
+#'
+#'   # one-way tables
+#'
+#'   ggtable(happy$marital, weights = happy$wtssall)
+#'   ggtable(happy$marital, weights = happy$wtssall, percent = TRUE, order = TRUE)
+#'   ggtable(happy$marital, weights = happy$wtssall, percent = TRUE, label = TRUE, append = "%")
+#'
+#'   # two-way tables
+#'
+#'   ggtable(happy$marital, happy$sex, weights = happy$wtssall)
+#'   ggtable(happy$sex, happy$marital, weights = happy$wtssall)
+#'   ggtable(happy$sex, happy$marital, weights = happy$wtssall, percent = TRUE)
+#'
+#'   # using options
+#'
+#'   ggtable(happy$degree, happy$health, weights = happy$wtssall, percent = TRUE,
+#'           label = TRUE, name = "", palette = "PRGn") +
+#'     labs(y = NULL, x = NULL, title = "Health status, by education level") +
 #'     theme_bw(16) +
 #'     theme(legend.position = "top", axis.ticks = element_blank())
-#'   
 #' }
-ggtable <- function(x, y = NULL, percent = FALSE, name = "",
-                    order.x = TRUE, order.y = FALSE, order = order.x,
-                    label = FALSE, hjust = 2, color = "grey90", append = "", 
-                    verbose = FALSE, palette = NULL, horizontal = TRUE, 
+ggtable <- function(x, y = NULL, weights = NULL, percent = FALSE, breaks = 5,
+                    name = NULL, order = FALSE, label = FALSE, hjust = 0.5,
+                    fill = "grey20", color = "grey90",
+                    append = "", round = 0, big.mark = ",", decimal.mark = ".",
+                    palette = NULL, horizontal = TRUE,
                     position = "stack", legend.position = "right", ...) {
-  
-  require(ggplot2)
-  require(plyr)
-  
-  # get table
-  if (is.null(y)) t = table(x) else t = table(x, y)
-  if (percent & is.null(y)) t = 100 * prop.table(t)
-  if (percent & !is.null(y)) t = 100 * prop.table(t, 1)
-  
-  # reset any levels
-  t = data.frame(t, stringsAsFactors = FALSE)
-  
-  # restore existent 
-  if (!is.null(levels(x))) {
-    t$x = factor(as.character(t$x), levels = levels(x))    
+
+  # -- required packages -------------------------------------------------------
+
+  require(ggplot2, quietly = TRUE)
+  require(plyr, quietly = TRUE)
+  require(scales, quietly = TRUE)
+
+  # -- checks ------------------------------------------------------------------
+
+  if (nchar(decimal.mark) < 1) {
+    stop("incorrect decimal.mark value")
   }
-  
-  # optional reorder
-  if (isTRUE(order)) {
-    
-    if (verbose) message("Ordered by frequency of x.")
-    t$x = with(t, reorder(x, Freq, mean))
-    
-  }  
-  
-  # optional levels(x)
-  l = all(unique(na.omit(order)) %in% unique(na.omit(levels(t$x))))
-  
-  if (class(order) == "character" & l) {
-    
-    if (verbose) message("Using custom levels for x.")
-    if (horizontal) order = rev(order)
-    t$x = factor(t$x, levels = order)
-    
+
+  if (!is.null(y) && (length(x) != length(y))) {
+    stop("x and y are of unequal length")
   }
-  
-  if (is.null(y)) {
-    
-    # one-way horizontal bars
-    g = qplot(data = t, x = x, y = Freq, stat = "identity", geom = "bar") + 
-      scale_y_continuous(breaks = seq(0, max(t$Freq),
-                                      2*10 ^ (round(log10(max(t$Freq))) - 1)))
-    
-    if (label) g = g + 
-        geom_text(aes(label = paste0(round(Freq, 0), append)), hjust = hjust, color = color, ...)
-    
-  } else {
-    
-    # optional levels(y)
-    l = all(unique(na.omit(order.y)) %in% unique(na.omit(levels(t$y))))
-    
-    if (class(order.y) == "character" & l) {
-      
-      if (verbose) message("Using custom levels for y.")
-      if (horizontal) order.y = rev(order.y)
-      t$y = factor(t$y, levels = order.y)
-      
-    }
-    
-    # two-way horizontal bars
-    pos = ddply(t, .(x), transform, ycoord = cumsum(Freq) - 0.5 * Freq)
-    
-    g = qplot(data = t, x = x, y = Freq, fill = y,
-              stat = "identity", position = position, geom = "bar")
-    
-    if (length(palette) > 0) {
-      g = g + scale_fill_brewer(name, palette = palette)
+
+  if (is.null(weights)) {
+    weights = rep(1, length(x))
+  }
+
+  if (length(x) != length(weights)) {
+    stop("x and weights are of unequal length")
+  }
+
+  # -- remove missing values ---------------------------------------------------
+
+  m = is.na(x) || is.na(weights)
+  if (!is.null(y)) m = m || is.na(y)
+
+  x = x[ !m ]
+  if (!is.null(y)) y = y[ !m ]
+
+  weights = weights[ !m ]
+
+  # -- variable names for axis and legend titles -------------------------------
+
+  get_variable = function(x, name = NULL) {
+    if (is.null(name)) {
+      x = as.character(x)
+      x[ length(x) ]
     } else {
-      g = g + scale_fill_discrete(name)
+      name
     }
-    
+  }
+
+  get_number = function(x, y) {
+    if (percent && big.mark == decimal.mark) big.mark = ""
+    if (percent) x = round(100 * x, round)
+    x = scales::format_format(big.mark = big.mark, decimal.mark = decimal.mark,
+                              scientific = FALSE)(x)
+    paste0(x, y)
+  }
+
+  # -- get the table as frequencies or percentages -----------------------------
+
+  # get table
+  if (is.null(y)) {
+    t = tapply(weights, x, sum, simplify = TRUE)
+  } else {
+    t = tapply(weights, list(x, y), sum, simplify = TRUE)
+  }
+  t = as.table(t)
+
+  if (percent && is.null(y)) {
+    t = prop.table(t)
+  } else if (percent && !is.null(y)) {
+    t = prop.table(t, 1)
+  }
+
+  # preserve/add levels
+  t = data.frame(t, stringsAsFactors = TRUE)
+
+  # optional reorder(x)
+  if (isTRUE(order)) {
+    t$Var1 = with(t, reorder(Var1, Freq, mean))
+  }
+
+  # -- plot structure ----------------------------------------------------------
+
+  if (is.null(y)) {
+
+    # -- one-way horizontal bars -----------------------------------------------
+
+    g = qplot(data = t, x = Var1, y = Freq, stat = "identity", geom = "bar",
+              fill = I(fill)) +
+      xlab(get_variable(substitute(x)))
+
     if (percent) {
-      g = g + scale_y_continuous(breaks = 20*0:5)
-      
+      g = g + scale_y_continuous(breaks = scales::pretty_breaks(breaks),
+                                 labels = scales::percent_format()) +
+        ylab("percent")
+
     } else {
       g = g +
-        scale_y_continuous(breaks = seq(0, sum(t$Freq),
-                                        2*10 ^ (round(log10(sum(t$Freq))) - 1)))
+        scale_y_continuous(breaks = scales::pretty_breaks(breaks)) +
+        ylab("count")
     }
-    
+
     if (label) {
       g = g +
-        geom_text(data = pos,
-                  aes(label = paste0(round(Freq, 0), append), x = x, y = ycoord), 
-                  color = color, ...)
+        geom_text(aes(y = Freq / 2, label = get_number(Freq, append)),
+                  hjust = hjust, color = color, ...)
     }
-    
+
+  } else {
+
+    # -- two-way horizontal bars -----------------------------------------------
+
+    pos = plyr::ddply(t, .(Var1), transform, ycoord = (cumsum(Freq) - Freq / 2))
+
+    g = qplot(data = t, x = Var1, y = Freq, fill = Var2,
+              stat = "identity", position = position, geom = "bar") +
+      xlab(get_variable(substitute(x)))
+
+    if (is.null(palette)) {
+      g = g + scale_fill_discrete(get_variable(substitute(y), name))
+    } else {
+      g = g + scale_fill_brewer(get_variable(substitute(y), name), palette = palette)
+    }
+
+    if (percent) {
+      g = g + scale_y_continuous(breaks = scales::pretty_breaks(breaks),
+                                 labels = scales::percent_format()) +
+        ylab("percent")
+
+    } else {
+      g = g +
+        scale_y_continuous(breaks = scales::pretty_breaks(breaks)) +
+        ylab("count")
+    }
+
+    if (label) {
+
+      g = g +
+        geom_text(data = pos,
+                  aes(label = get_number(Freq, append), x = Var1, y = ycoord),
+                  hjust = hjust, color = color, ...)
+    }
+
   }
-  
+
+  # -- horizontal flip ---------------------------------------------------------
+
   if (horizontal) g = g + coord_flip()
-  
-  g = g + labs(y = NULL, x = NULL) + theme(legend.position = legend.position)
+
+  # -- finalize ----------------------------------------------------------------
+
+  g = g +
+    theme(legend.position = legend.position)
+
   return(g)
-  
+
 }

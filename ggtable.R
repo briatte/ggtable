@@ -161,8 +161,8 @@ ggtable <- function(x, y = NULL, weights = NULL, percent = FALSE, breaks = 5,
 
     # -- one-way horizontal bars -----------------------------------------------
 
-    g = qplot(data = t, x = Var1, y = Freq, stat = "identity", geom = "bar",
-              fill = I(fill)) +
+    g = ggplot(data = t, aes(x = Var1, y = Freq), fill = fill) +
+      geom_bar(stat = "identity") +
       xlab(get_variable(substitute(x)))
 
     if (percent) {
@@ -188,8 +188,8 @@ ggtable <- function(x, y = NULL, weights = NULL, percent = FALSE, breaks = 5,
 
     pos = plyr::ddply(t, .(Var1), transform, ycoord = (cumsum(Freq) - Freq / 2))
 
-    g = qplot(data = t, x = Var1, y = Freq, fill = Var2,
-              stat = "identity", position = position, geom = "bar") +
+    g = ggplot(data = t, aes(x = Var1, y = Freq, fill = Var2)) +
+      geom_bar(stat = "identity", position = position) +
       xlab(get_variable(substitute(x)))
 
     if (is.null(palette)) {
